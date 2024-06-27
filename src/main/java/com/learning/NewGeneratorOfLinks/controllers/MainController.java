@@ -47,7 +47,7 @@ public class MainController {
     }
 
     @GetMapping("/info/{shortUrl}")
-    public Url info(@PathVariable String shortUrl) throws IOException {
+    public Url info(@PathVariable String shortUrl){
         return service.getFullInfo(shortUrl);
     }
 
