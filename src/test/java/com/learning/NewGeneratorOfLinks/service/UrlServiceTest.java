@@ -25,8 +25,6 @@ class UrlServiceTest {
     @InjectMocks
     private UrlServiceBD urlService;
 
-
-
     @BeforeEach
     public void setUpService() {
         MockitoAnnotations.openMocks(this);
@@ -37,7 +35,7 @@ class UrlServiceTest {
         String fullUrl = "https://wago.io/";
         Url url = Url.builder()
                 .fullUrl(fullUrl)
-                .shortUrl(Url.makeShortUrl())
+                .shortUrl(urlService.makeShortUrl())
                 .createdTime(LocalDateTime.now())
                 .countOf(0L)
                 .lastTimeUsed(LocalDateTime.now())
@@ -56,7 +54,7 @@ class UrlServiceTest {
         String fullUrl = "123";
         Url url = Url.builder()
                 .fullUrl(fullUrl)
-                .shortUrl(Url.makeShortUrl())
+                .shortUrl(urlService.makeShortUrl())
                 .createdTime(LocalDateTime.now())
                 .countOf(0L)
                 .lastTimeUsed(LocalDateTime.now())
@@ -70,7 +68,7 @@ class UrlServiceTest {
     @Test
     public void test_getFullUrl_returningString() {
         String fullUrl = "https://wago.io/";
-        String shortUrl = Url.makeShortUrl();
+        String shortUrl = urlService.makeShortUrl();
         Url url = Url.builder()
                 .fullUrl(fullUrl)
                 .shortUrl(shortUrl)
@@ -88,7 +86,7 @@ class UrlServiceTest {
     @Test
     public void test_incrementCount(){
         String fullUrl = "https://wago.io/";
-        String shortUrl = Url.makeShortUrl();
+        String shortUrl = urlService.makeShortUrl();
         Url url = Url.builder()
                 .fullUrl(fullUrl)
                 .shortUrl(shortUrl)
@@ -113,7 +111,7 @@ class UrlServiceTest {
     @Test
     public void test_getInfo(){
         String fullUrl = "https://wago.io/";
-        String shortUrl = Url.makeShortUrl();
+        String shortUrl = urlService.makeShortUrl();
         Url url = Url.builder()
                 .fullUrl(fullUrl)
                 .shortUrl(shortUrl)

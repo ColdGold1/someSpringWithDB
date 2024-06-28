@@ -6,23 +6,19 @@ import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
+import java.util.Random;
 
 
 @Primary
 @AllArgsConstructor
 @Service
-public class UrlServiceBD implements IUrlService{
+public class UrlServiceBD implements UrlService {
 
     private UrlRepository urlRepository;
-
 
     @Override
     public List<Url> getUrls() {
@@ -34,14 +30,11 @@ public class UrlServiceBD implements IUrlService{
         try {
             boolean b = isAvailable(fullUrl);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return null;
         }
 
+
         String shortUrl = findUniqueUrl();
-
-//        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
-//        LocalDateTime nw = LocalDateTime.parse(LocalDateTime.now().format(dateTimeFormatter),dateTimeFormatter);
-
         Url url = Url.builder()
                 .fullUrl(fullUrl)
                 .shortUrl(shortUrl)
@@ -49,15 +42,39 @@ public class UrlServiceBD implements IUrlService{
                 .countOf(0L)
                 .lastTimeUsed(LocalDateTime.now())
                 .build();
+
         if (urlRepository.findUrlByFullUrl(fullUrl) == null) {
             urlRepository.save(url);
             return url;
         }
+
         return urlRepository.findUrlByFullUrl(fullUrl);
     }
 
+    private String findUniqueUrl() {
+        StringBuilder result = new StringBuilder();
+        do {
+            result.delete(0, result.length());
+            result.append(makeShortUrl());
+        } while (urlRepository.findUrlByShortUrl(result.toString()) != null);
+        return result.toString();
+    }
+
+    public String makeShortUrl() {
+        StringBuilder newShortUrl = new StringBuilder();
+        String s = "abcdefghijklmonpqrstuvwxyzABCDEFGHIJKLMOPQRSTUVWXYZ0123456789";
+        Random random = new Random();
+
+        for (int i = 0; i < 6; i++) {
+            newShortUrl.append(s.charAt(random.nextInt(s.length())));
+        }
+
+        return newShortUrl.toString();
+    }
+
     private boolean isAvailable(String fullUrl) throws Exception {
-        HttpURLConnection connection = (HttpURLConnection) new URL(fullUrl).openConnection();
+        HttpURLConnection connection = (HttpURLConnection) new URL(fullUrl)
+                .openConnection();
         connection.setRequestMethod("HEAD");
         return connection.getResponseCode() != HttpURLConnection.HTTP_OK;
     }
@@ -65,7 +82,9 @@ public class UrlServiceBD implements IUrlService{
     @Override
     public String getFullUrl(String shortUrl) {
 
-        return (urlRepository.findUrlByShortUrl(shortUrl) == null) ? null : urlRepository.findUrlByShortUrl(shortUrl).getFullUrl();
+        return (urlRepository.findUrlByShortUrl(shortUrl) == null)
+               ? null
+               : urlRepository.findUrlByShortUrl(shortUrl).getFullUrl();
     }
 
     @Override
@@ -78,24 +97,12 @@ public class UrlServiceBD implements IUrlService{
         return urlRepository.findUrlByShortUrl(shortUrl);
     }
 
-
-    public void incrementCount(String shortUrl){
+    public void incrementCount(String shortUrl) {
         Url url = urlRepository.findUrlByShortUrl(shortUrl);
         url.setCountOf(url.getCountOf() + 1);
-
-//        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
-//        LocalDateTime nw = LocalDateTime.parse(LocalDateTime.now().format(dateTimeFormatter),dateTimeFormatter);
 
         url.setLastTimeUsed(LocalDateTime.now());
         urlRepository.save(url);
     }
 
-    private String findUniqueUrl() {
-        StringBuilder result = new StringBuilder();
-        do {
-            result.delete(0, result.length());
-            result.append(Url.makeShortUrl());
-        } while (!uniqueShortUrls.add(result.toString()));
-        return result.toString();
-    }
 }

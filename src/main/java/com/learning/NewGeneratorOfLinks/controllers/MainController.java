@@ -2,22 +2,20 @@ package com.learning.NewGeneratorOfLinks.controllers;
 
 
 import com.learning.NewGeneratorOfLinks.models.Url;
-import com.learning.NewGeneratorOfLinks.service.IUrlService;
+import com.learning.NewGeneratorOfLinks.service.UrlService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/urls")
 @AllArgsConstructor
 public class MainController {
 
-    private final IUrlService service;
-
+    private final UrlService service;
 
     @GetMapping("")
     public List<Url> getUrls(){
@@ -25,8 +23,12 @@ public class MainController {
     }
 
     @PutMapping("addUrl")
-    public Url addUrl(@RequestParam String fullUrl) {
-        return service.addUrl(fullUrl);
+    public Url addUrl(@RequestParam String fullUrl, HttpServletResponse response) throws IOException {
+        Url url = service.addUrl(fullUrl);
+        if (url == null){
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        }
+        return url;
     }
 
     @GetMapping("findUrl/{shortUrl}")
